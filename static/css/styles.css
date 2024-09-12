@@ -56,3 +56,19 @@ button:hover {
 label {
     margin-right: 5px;
 }
+
+#leaderboard {
+    margin-top: 20px;
+    text-align: left;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#leaderboard h2 {
+    text-align: center;
+}
+
+#leaderboard ol {
+    padding-left: 20px;
+}
