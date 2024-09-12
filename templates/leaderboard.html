@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PengDuel Leaderboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div id="leaderboard-container">
+        <h1>PengDuel Leaderboard</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Wins</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in players %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ player.name }}</td>
+                    <td>{{ player.wins }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <a href="/" class="button">Back to Game</a>
+    </div>
+</body>
+</html>

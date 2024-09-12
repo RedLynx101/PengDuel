@@ -8,7 +8,7 @@ body {
     background-color: #87CEEB;
 }
 
-#game-container {
+#game-container, #leaderboard-container {
     text-align: center;
 }
 
@@ -32,16 +32,18 @@ input[type="text"] {
     margin: 0 5px;
 }
 
-button {
+button, .button {
     padding: 5px 10px;
     background-color: #1E90FF;
     color: white;
     border: none;
     cursor: pointer;
     margin: 5px;
+    text-decoration: none;
+    display: inline-block;
 }
 
-button:hover {
+button:hover, .button:hover {
     background-color: #4169E1;
 }
 
@@ -55,4 +57,29 @@ button:hover {
 
 label {
     margin-right: 5px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #1E90FF;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+tr:hover {
+    background-color: #ddd;
 }
