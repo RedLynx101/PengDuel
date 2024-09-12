@@ -3,13 +3,16 @@ const ctx = canvas.getContext('2d');
 
 const ICEBERG_RADIUS = 250;
 const PENGUIN_RADIUS = 20;
-const PUSH_FORCE = 2.5; // Stays at 2.5
+const PUSH_FORCE = 2.5;
 const FRICTION = 0.98;
+const POWERUP_RADIUS = 15;
+const POWERUP_DURATION = 5000; // 5 seconds
 
 let gameState = 'start';
 let player1, player2;
 let winner = null;
 let gameMode = 'twoPlayer';
+let powerUps = [];
 
 class Penguin {
     constructor(x, y, color, name) {
@@ -22,6 +25,9 @@ class Penguin {
         this.vy = 0;
         this.crowned = false;
         this.mass = 1;
+        this.powerUpActive = false;
+        this.powerUpType = null;
+        this.powerUpEndTime = 0;
     }
 
     update() {
@@ -38,6 +44,11 @@ class Penguin {
             player2.crowned = false;
             winner.crowned = true;
             audioManager.playSound('splash');
+        }
+
+        // Check if power-up has expired
+        if (this.powerUpActive && Date.now() > this.powerUpEndTime) {
+            this.deactivatePowerUp();
         }
     }
 
@@ -64,6 +75,39 @@ class Penguin {
             ctx.fillStyle = 'gold';
             ctx.fill();
         }
+
+        // Draw power-up indicator
+        if (this.powerUpActive) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, PENGUIN_RADIUS + 5, 0, Math.PI * 2);
+            ctx.strokeStyle = this.powerUpType === 'speed' ? 'yellow' : 'green';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+    }
+
+    activatePowerUp(type) {
+        this.powerUpActive = true;
+        this.powerUpType = type;
+        this.powerUpEndTime = Date.now() + POWERUP_DURATION;
+
+        if (type === 'speed') {
+            this.vx *= 1.5;
+            this.vy *= 1.5;
+        } else if (type === 'size') {
+            this.mass *= 1.5;
+        }
+    }
+
+    deactivatePowerUp() {
+        this.powerUpActive = false;
+        if (this.powerUpType === 'speed') {
+            this.vx /= 1.5;
+            this.vy /= 1.5;
+        } else if (this.powerUpType === 'size') {
+            this.mass /= 1.5;
+        }
+        this.powerUpType = null;
     }
 }
 
@@ -76,13 +120,11 @@ class AIPenguin extends Penguin {
         this.initialMaxSpeed = 1.2;
         this.reset();
     }
-
     update() {
         super.update();
         this.updateTarget();
         this.moveTowardsTarget();
     }
-
     updateTarget() {
         if (Math.random() < 0.55) {  // 55% of the time, target the player
             const offsetX = (Math.random() - 0.5) * PENGUIN_RADIUS * 8;
@@ -96,39 +138,67 @@ class AIPenguin extends Penguin {
             this.targetY = canvas.height / 2 + Math.sin(angle) * distance;
         }
     }
-
     moveTowardsTarget() {
         const dx = this.targetX - this.x;
         const dy = this.targetY - this.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
-        if (distance > 1) {
-            let vx = (dx / distance) * this.acceleration;
-            let vy = (dy / distance) * this.acceleration;
 
-            // Limit the speed
+        // Only apply movement if the distance is significant
+        if (distance > 1) {
+            // Normalize direction vector
+            const vx = (dx / distance) * this.acceleration;
+            const vy = (dy / distance) * this.acceleration;
+
+            // Add acceleration to the current velocity
+            this.vx += vx;
+            this.vy += vy;
+
+            // Calculate the current speed
             const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
+
+            // Ensure the AI doesn't exceed the maximum speed
             if (currentSpeed > this.maxSpeed) {
-                vx *= this.maxSpeed / currentSpeed;
-                vy *= this.maxSpeed / currentSpeed;
-                
-            } else {
-                this.vx += vx;
-                this.vy += vy;
+                const scale = this.maxSpeed / currentSpeed;
+                this.vx *= scale; // Scale down the velocity proportionally
+                this.vy *= scale;
             }
         }
+        console.log(`AI Speed: ${Math.sqrt(this.vx * this.vx + this.vy * this.vy)}`);
     }
+
 
     reset() {
         console.log('Resetting AIPenguin');
         this.x = this.initialX;
         this.y = this.initialY;
-        this.vx = 0;
-        this.vy = 0;
-        this.acceleration = this.initialAcceleration;  // Reset to initial acceleration
-        this.maxSpeed = this.initialMaxSpeed;          // Reset to initial max speed
+        this.vx = 0; // Reset velocity to zero
+        this.vy = 0; // Reset velocity to zero
+        this.acceleration = this.initialAcceleration;  // Ensure acceleration is reset
+        this.maxSpeed = this.initialMaxSpeed;          // Ensure max speed is reset
         console.log(`AIPenguin reset - Position: (${this.x}, ${this.y}), Acceleration: ${this.acceleration}, Max Speed: ${this.maxSpeed}`);
     }
+}
 
+class PowerUp {
+    constructor() {
+        this.spawn();
+    }
+
+    spawn() {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * (ICEBERG_RADIUS - POWERUP_RADIUS - 20); // Keep power-ups away from the edge
+        this.x = canvas.width / 2 + Math.cos(angle) * distance;
+        this.y = canvas.height / 2 + Math.sin(angle) * distance;
+        this.type = Math.random() < 0.5 ? 'speed' : 'size';
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, POWERUP_RADIUS, 0, Math.PI * 2);
+        ctx.fillStyle = this.type === 'speed' ? 'yellow' : 'green';
+        ctx.fill();
+        ctx.closePath();
+    }
 }
 
 function init() {
@@ -173,12 +243,14 @@ function init() {
     console.log('Setting collision sound volume');
     audioManager.setVolume('collision', 2);
 
+    // Initialize power-ups
+    powerUps = [new PowerUp()];
+
     console.log('Starting game loop');
     gameLoop();
 }
 
 function drawIceberg() {
-    // console.log('Drawing iceberg');
     ctx.beginPath();
     ctx.arc(canvas.width/2, canvas.height/2, ICEBERG_RADIUS, 0, Math.PI * 2);
     ctx.fillStyle = 'white';
@@ -215,6 +287,21 @@ function update() {
             audioManager.playSound('collision');
             audioManager.playSound('beep');
         }
+
+        // Check for power-up collisions
+        powerUps.forEach((powerUp, index) => {
+            [player1, player2].forEach(player => {
+                const dx = player.x - powerUp.x;
+                const dy = player.y - powerUp.y;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+
+                if (distance < PENGUIN_RADIUS + POWERUP_RADIUS) {
+                    player.activatePowerUp(powerUp.type);
+                    powerUps.splice(index, 1);
+                    setTimeout(() => powerUps.push(new PowerUp()), 5000); // Respawn power-up after 5 seconds
+                }
+            });
+        });
     }
 }
 
@@ -227,6 +314,9 @@ function draw() {
         player2.draw();
     }
 
+    // Draw power-ups
+    powerUps.forEach(powerUp => powerUp.draw());
+
     if (gameState === 'gameOver') {
         ctx.fillStyle = 'black';
         ctx.font = '30px Arial';
@@ -237,7 +327,6 @@ function draw() {
 }
 
 function gameLoop() {
-    // console.log('Game loop iteration');
     update();
     draw();
     requestAnimationFrame(gameLoop);
@@ -267,10 +356,12 @@ function restartGame() {
         player2.maxSpeed = player2.initialMaxSpeed;
     }
 
+    // Reset power-ups
+    powerUps = [new PowerUp()];
+
     document.getElementById('player-inputs').style.display = 'block';
     document.getElementById('restart-game').style.display = 'none';
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded, setting up event listeners');
