@@ -7,8 +7,8 @@ export class AIPenguin extends Penguin {
         console.log(`AIPenguin constructor called for ${name}, SVG passed: ${!!penguinSVG}`);
         this.initialX = x;
         this.initialY = y;
-        this.initialAcceleration = 0.3;
-        this.initialMaxSpeed = 2;
+        this.initialAcceleration = 0.15;
+        this.initialMaxSpeed = 50;
         this.reset();
     }
 
