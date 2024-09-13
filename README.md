@@ -1,87 +1,76 @@
 # PengDuel
-**PengDuel** is a fun and interactive browser-based game where penguins battle it out on an iceberg! Choose between single-player mode against an AI opponent or challenge a friend in two-player mode. Customize your penguin, collect power-ups, and knock your opponent off the iceberg to win! Made it as a test, for fun.
+
+PengDuel is a web-based two-player penguin fighting game built using Flask and JavaScript with HTML5 Canvas.
 
 ## Features
-- **Single-Player and Two-Player Modes:** Play against an AI penguin or with a friend.
-- **Customizable Penguins:** Choose your penguin's name and color.
-- **Power-Ups:** Collect speed boosts and size increases to gain an advantage.
-- **Adjustable Game Settings:** Modify iceberg size, penguin size, friction, and push force.
-- **Sound Effects and Music:** Enjoy immersive audio with background music and sound effects.
-- **Leaderboard:** Keep track of wins for each player.
-## Technologies Used
-- **Flask:** Backend framework for serving the game.
-- **JavaScript (ES6 Modules):** Game logic and interactivity.
-- **HTML5 Canvas:** Rendering game graphics.
-- **CSS:** Styling the game interface.
-- **SVG Graphics:** For funny penguin images.
-- **Web Audio API:** Managing game sound effects and music.
+
+- Single-player mode against AI
+- Two-player mode
+- Power-ups and obstacles
+- Leaderboard to track wins
+- Customizable game constants
+
+## Prerequisites
+
+- Python 3.7+
+- pip (Python package manager)
 
 ## Installation
-1. Clone the Repository
-    ~~~
-    git clone https://github.com/redlynx101/pengduel.git
-    cd pengduel
-    ~~~
-2. Create a Virtual Environment
-    ~~~
-    python3 -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    ~~~
-3. Install Dependencies
-    ~~~
-    pip install -r requirements.txt
-    ~~~
-4. Run the Flask App
-    ~~~
-    flask run
-    ~~~
-5. Open in Browser
 
-    Visit **http://localhost:5000** in your web browser to start playing!
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/pengduel.git
+   cd pengduel
+   ```
 
-## How to Play
-### Controls
-#### Player 1
-Move Up: W
-Move Down: S
-Move Left: A
-Move Right: D
-#### Player 2 (Two-Player Mode)
-Move Up: ↑
-Move Down: ↓
-Move Left: ←
-Move Right: →
-Start/Restart Game: Spacebar or click the on-screen buttons.
-### Objective
-Knock your opponent off the iceberg!
-Use your movement keys to build momentum.
-Collide with your opponent to push them.
-Be careful not to slide off the edge yourself!
-### Power-Ups
-Collect power-ups that appear randomly on the iceberg to gain temporary advantages.
+2. Install the required packages:
+   ```
+   pip install -r requirements.txt
+   ```
 
-- **Speed Boost:** Increases acceleration and reduces size.
-- **Size Increase:** Makes your penguin bigger and heavier.
+3. Set up environment variables:
+   Create a `.env` file in the root directory and add the following:
+   ```
+   SECRET_KEY=your_secret_key_here
+   DATABASE_URL=your_database_url_here
+   ```
 
-### Adjustable Game Settings
-Click the "Toggle Game Constants Menu" to adjust:
+## Running the Application
 
-- Iceberg Radius
-- Penguin Radius
-- Push Force
-- Friction
-- These settings allow you to customize the gameplay experience.
+### Development
 
-## Acknowledgments
-- **Sounds and Music:** Thanks to pixabay.com for sound effects. Thanks to Suno for the AI-generated music. 
-- **SVG Penguin Image:** Courtesy of AI.
-- **Frameworks and Libraries:**
-  - Flask
-  - Web Audio API
+To run the application in development mode:
+
+```
+python main.py
+```
+
+The application will be available at `http://localhost:5000`.
+
+### Production
+
+For production deployment, we recommend using Gunicorn as the WSGI server:
+
+1. Install Gunicorn:
+   ```
+   pip install gunicorn
+   ```
+
+2. Run the application:
+   ```
+   gunicorn -w 4 -b 0.0.0.0:5000 main:app
+   ```
+
+   This command starts 4 worker processes and binds the application to all network interfaces on port 5000.
+
+## Deployment
+
+This application is ready for deployment on platforms like Heroku, AWS, or DigitalOcean. Make sure to set the necessary environment variables on your deployment platform.
+
 ## Contributing
-Contributions are welcome! Please open an issue or submit a pull request.
+
+Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests.
 
 ## License
-This project is licensed under the MIT License.
 
-Enjoy playing PengDuel! If you have any questions or feedback, feel free to reach out.
+This project is licensed under the MIT License - see the LICENSE.md file for details.

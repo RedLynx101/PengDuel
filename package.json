@@ -1,0 +1,12 @@
+{
+  "name": "pengduel",
+  "version": "1.0.0",
+  "description": "A web-based two-player penguin fighting game",
+  "main": "index.js",
+  "scripts": {
+    "start": "gunicorn main:app"
+  },
+  "keywords": ["game", "penguin", "flask"],
+  "author": "",
+  "license": "ISC"
+}
