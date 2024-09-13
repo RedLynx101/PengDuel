@@ -44,7 +44,8 @@ args = "gunicorn wsgi:app -b 0.0.0.0:5000"
 waitForPort = 5000
 
 [deployment]
-run = ["sh", "-c", "python main.py"]
+run = ["sh", "-c", "gunicorn wsgi:app -b 0.0.0.0:5000"]
+deploymentTarget = "cloudrun"
 
 [[ports]]
 localPort = 5000
