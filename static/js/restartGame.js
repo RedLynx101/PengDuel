@@ -22,10 +22,5 @@ export function restartGame(player1, player2, gameState, powerUps, canvas) {
     document.getElementById('player-inputs').style.display = 'block';
     document.getElementById('restart-game').style.display = 'none';
 
-    // Re-enable map selector buttons
-    document.querySelectorAll('.map-selector button').forEach(button => {
-        button.disabled = false;
-    });
-
     return { gameState, powerUps };
 }
