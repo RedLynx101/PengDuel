@@ -7,8 +7,8 @@ export class AIPenguin extends Penguin {
         console.log(`AIPenguin constructor called for ${name}, SVG passed: ${!!penguinSVG}`);
         this.initialX = x;
         this.initialY = y;
-        this.initialAcceleration = 0.1;
-        this.initialMaxSpeed = 1.2;
+        this.initialAcceleration = 0.3;
+        this.initialMaxSpeed = 2;
         this.reset();
     }
 
@@ -20,12 +20,12 @@ export class AIPenguin extends Penguin {
     }
 
     updateTarget(canvas, player1) {
-        if (Math.random() < 0.55) {  // 55% of the time, target the player
+        if (Math.random() < 0.65) {  // 65% of the time, target the player
             const offsetX = (Math.random() - 0.5) * PENGUIN_RADIUS * 8;
             const offsetY = (Math.random() - 0.5) * PENGUIN_RADIUS * 8;
             this.targetX = player1.x + offsetX;
             this.targetY = player1.y + offsetY;
-        } else {  // 45% of the time, choose a random point on the iceberg
+        } else {  // 35% of the time, choose a random point on the iceberg
             const angle = Math.random() * Math.PI * 2;
             const distance = Math.random() * (ICEBERG_RADIUS - PENGUIN_RADIUS);
             this.targetX = canvas.width / 2 + Math.cos(angle) * distance;
@@ -39,7 +39,7 @@ export class AIPenguin extends Penguin {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Only apply movement if the distance is significant
-        if (distance > 1) {
+        if (distance > .3) {
             // Normalize direction vector
             const vx = (dx / distance) * this.acceleration;
             const vy = (dy / distance) * this.acceleration;
