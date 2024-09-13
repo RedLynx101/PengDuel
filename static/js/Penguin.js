@@ -23,14 +23,13 @@ export class Penguin {
         this.loadSVG(penguinSVG);
     }
 
-
     loadSVG(penguinSVG) {
         if (penguinSVG) {
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(penguinSVG, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
             svgElement.querySelectorAll('circle, path').forEach(element => {
-                if (element.getAttribute('fill') !== '#FFFFFF') {
+                if (element.getAttribute('fill') === '#000000') {
                     element.setAttribute('fill', this.color);
                 }
             });
@@ -46,6 +45,7 @@ export class Penguin {
             img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
         }
     }
+
     update(canvas, gameState, winner, audioManager, scores, updateLeaderboard) {
         this.x += this.vx;
         this.y += this.vy;
@@ -56,6 +56,7 @@ export class Penguin {
         }
         return gameState;
     }
+
     draw(ctx) {
         console.log(`Drawing penguin: ${this.name}, position: (${this.x}, ${this.y})`);
         if (this.svgImage) {
@@ -69,6 +70,7 @@ export class Penguin {
         }
         this.drawNameAndCrown(ctx);
     }
+
     drawNameAndCrown(ctx) {
         console.log(`Drawing name and crown for ${this.name}, crowned: ${this.crowned}`);
         ctx.fillStyle = 'black';
@@ -122,16 +124,17 @@ export class Penguin {
         } else if (this.powerUpType === 'size') {
             this.currentRadius = this.originalRadius;
             this.mass = this.originalMass;
+            this.currentAcceleration = this.originalAccelaration;
         }
         this.powerUpActive = false;
         this.powerUpType = null;
     }
 
-
     setCrowned(crowned) {
         console.log(`Setting crowned status for ${this.name}: ${crowned}`);
         this.crowned = crowned;
     }
+
     removeCrown() {
         this.crowned = false;
     }

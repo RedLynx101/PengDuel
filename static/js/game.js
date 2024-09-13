@@ -46,18 +46,20 @@ function init() {
     console.log('Game initialization started');
     const player1Name = document.getElementById('player1-name').value || 'Player 1';
     const player2Name = gameMode === 'singlePlayer' ? 'AI Penguin' : (document.getElementById('player2-name').value || 'Player 2');
-    console.log(`Initializing players: ${player1Name} and ${player2Name}`);
+    const player1Color = document.getElementById('player1-color').value;
+    const player2Color = document.getElementById('player2-color').value;
+    console.log(`Initializing players: ${player1Name} (${player1Color}) and ${player2Name} (${player2Color})`);
     const prevPlayer1Crowned = player1 ? player1.crowned : false;
     const prevPlayer2Crowned = player2 ? player2.crowned : false;
-    player1 = new Penguin(canvas.width/2 - 50, canvas.height/2, 'blue', player1Name, penguinSVG);
+    player1 = new Penguin(canvas.width/2 - 50, canvas.height/2, player1Color, player1Name, penguinSVG);
     player1.vx = 0;
     player1.vy = 0;
 
     if (gameMode === 'singlePlayer') {
-        player2 = new AIPenguin(canvas.width/2 + 50, canvas.height/2, 'red', player2Name, penguinSVG);
+        player2 = new AIPenguin(canvas.width/2 + 50, canvas.height/2, player2Color, player2Name, penguinSVG);
         player2.reset();
     } else {
-        player2 = new Penguin(canvas.width/2 + 50, canvas.height/2, 'red', player2Name, penguinSVG);
+        player2 = new Penguin(canvas.width/2 + 50, canvas.height/2, player2Color, player2Name, penguinSVG);
         player2.vx = 0;
         player2.vy = 0;
     }
@@ -91,7 +93,6 @@ function drawIceberg() {
     ctx.fill();
     ctx.closePath();
 }
-
 function update() {
     if (gameState === 'playing') {
         const p1DistanceFromCenter = Math.sqrt((player1.x - canvas.width/2)**2 + (player1.y - canvas.height/2)**2);
@@ -141,7 +142,6 @@ function update() {
                 const dx = player.x - powerUp.x;
                 const dy = player.y - powerUp.y;
                 const distance = Math.sqrt(dx*dx + dy*dy);
-
                 if (distance < player.currentRadius + POWERUP_RADIUS) {
                     player.activatePowerUp(powerUp.type);
                     powerUps.splice(index, 1);
@@ -152,7 +152,6 @@ function update() {
         });
     }
 }
-
 function draw() {
     console.log('Drawing game frame, gameState:', gameState);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -167,7 +166,6 @@ function draw() {
     }    
     console.log('Drawing power-ups');
     powerUps.forEach(powerUp => powerUp.draw(ctx));
-    
 
     if (gameState === 'gameOver' && winner) {
         console.log('Drawing game over screen');
@@ -178,16 +176,15 @@ function draw() {
         document.getElementById('restart-game').style.display = 'block';
     }
 }
-
 function gameLoop() {
     console.log('Game loop iteration');
     update();
     draw();
     animationFrameId = requestAnimationFrame(gameLoop);
 }
-
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded, setting up event listeners');
+
     document.addEventListener('keydown', (e) => {
         if (gameState === 'playing') {
             switch(e.key) {
@@ -215,11 +212,18 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Add event listener for restart button
     document.getElementById('start-game').addEventListener('click', () => {
         console.log('Start Game button clicked');
         init();
     });
+
     document.getElementById('restart-game').addEventListener('click', () => {
+        const player1Color = document.getElementById('player1-color').value;
+        const player2Color = document.getElementById('player2-color').value;
+        player1.color = player1Color;
+        player2.color = player2Color;
         const result = restartGame(player1, player2, gameState, powerUps, canvas);
         gameState = result.gameState;
         powerUps = result.powerUps;
@@ -228,45 +232,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         animationFrameId = requestAnimationFrame(gameLoop);
     });
-    document.getElementById('single-player').addEventListener('click', () => {
-        console.log('Single Player mode selected');
-        gameMode = 'singlePlayer';
-        document.getElementById('player2-name').style.display = 'none';
-        document.getElementById('player2-label').textContent = 'AI Opponent';
-    });
-    document.getElementById('two-player').addEventListener('click', () => {
-        console.log('Two Player mode selected');
-        gameMode = 'twoPlayer';
-        document.getElementById('player2-name').style.display = 'inline-block';
-        document.getElementById('player2-label').textContent = 'Player 2 Name:';
-    });
 
-    // New event listeners for game constants menu
-    document.getElementById('toggle-constants-menu').addEventListener('click', () => {
-        const menu = document.getElementById('game-constants-menu');
-        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-    });
 
-    document.getElementById('apply-constants').addEventListener('click', () => {
-        ICEBERG_RADIUS = Number(document.getElementById('iceberg-radius').value);
-        PENGUIN_RADIUS = Number(document.getElementById('penguin-radius').value);
-        PUSH_FORCE = Number(document.getElementById('push-force').value);
-        FRICTION = Number(document.getElementById('friction').value);
-
-        // Update penguin sizes
-        if (player1) player1.currentRadius = PENGUIN_RADIUS;
-        if (player2) player2.currentRadius = PENGUIN_RADIUS;
-
-        console.log('Game constants updated:', { ICEBERG_RADIUS, PENGUIN_RADIUS, PUSH_FORCE, FRICTION });
-    });
-
-    // Initialize input fields with current values
-    document.getElementById('iceberg-radius').value = ICEBERG_RADIUS;
-    document.getElementById('penguin-radius').value = PENGUIN_RADIUS;
-    document.getElementById('push-force').value = PUSH_FORCE;
-    document.getElementById('friction').value = FRICTION;
-
-    console.log('Event listeners set up successfully');
+document.getElementById('single-player').addEventListener('click', () => {
+    console.log('Single Player mode selected');
+    gameMode = 'singlePlayer';
+    document.getElementById('player2-name').style.display = 'none';
+    document.getElementById('player2-label').textContent = 'AI Opponent';
 });
+document.getElementById('two-player').addEventListener('click', () => {
+    console.log('Two Player mode selected');
+    gameMode = 'twoPlayer';
+    document.getElementById('player2-name').style.display = 'inline-block';
+    document.getElementById('player2-label').textContent = 'Player 2 Name:';
+});
+// New event listeners for game constants menu
+document.getElementById('toggle-constants-menu').addEventListener('click', () => {
+    const menu = document.getElementById('game-constants-menu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+});
+document.getElementById('apply-constants').addEventListener('click', () => {
+    ICEBERG_RADIUS = Number(document.getElementById('iceberg-radius').value);
+    PENGUIN_RADIUS = Number(document.getElementById('penguin-radius').value);
+    PUSH_FORCE = Number(document.getElementById('push-force').value);
+    FRICTION = Number(document.getElementById('friction').value);
+    // Update penguin sizes
+    if (player1) player1.currentRadius = PENGUIN_RADIUS;
+    if (player2) player2.currentRadius = PENGUIN_RADIUS;
+    console.log('Game constants updated:', { ICEBERG_RADIUS, PENGUIN_RADIUS, PUSH_FORCE, FRICTION });
+});
+// Initialize input fields with current values
+document.getElementById('iceberg-radius').value = ICEBERG_RADIUS;
+document.getElementById('penguin-radius').value = PENGUIN_RADIUS;
+document.getElementById('push-force').value = PUSH_FORCE;
+document.getElementById('friction').value = FRICTION;
+console.log('Event listeners set up successfully');});
 
 drawIceberg();
