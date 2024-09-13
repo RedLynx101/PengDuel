@@ -13,6 +13,14 @@ export const FRICTION = 0.98;
 export const POWERUP_RADIUS = 15;
 export const POWERUP_DURATION = 10000; // 10 seconds
 
+const icebergShapes = [
+    { type: 'circle', radius: 250 },
+    { type: 'rectangle', width: 400, height: 300 },
+    { type: 'triangle', size: 400 }
+];
+
+let currentIcebergShape = icebergShapes[0];  // Set a default shape
+
 let penguinSVG;
 fetch('/static/assets/penguin.svg')
   .then(response => response.text())
@@ -87,7 +95,11 @@ function init() {
     console.log('Setting collision sound volume');
     audioManager.setVolume('collision', 2);
 
-    powerUps = [new PowerUp(canvas.width, canvas.height)];
+    // Select a random iceberg shape
+    currentIcebergShape = icebergShapes[Math.floor(Math.random() * icebergShapes.length)];
+    console.log('Selected iceberg shape:', currentIcebergShape.type);
+
+    powerUps = [new PowerUp(canvas.width, canvas.height, currentIcebergShape)];
 
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -97,19 +109,59 @@ function init() {
 }
 
 function drawIceberg() {
-    ctx.beginPath();
-    ctx.arc(canvas.width/2, canvas.height/2, ICEBERG_RADIUS, 0, Math.PI * 2);
+    console.log('Drawing iceberg, shape:', currentIcebergShape.type);
     ctx.fillStyle = 'white';
+    ctx.beginPath();
+
+    switch (currentIcebergShape.type) {
+        case 'circle':
+            ctx.arc(canvas.width/2, canvas.height/2, currentIcebergShape.radius, 0, Math.PI * 2);
+            break;
+        case 'rectangle':
+            ctx.rect(
+                canvas.width/2 - currentIcebergShape.width/2,
+                canvas.height/2 - currentIcebergShape.height/2,
+                currentIcebergShape.width,
+                currentIcebergShape.height
+            );
+            break;
+        case 'triangle':
+            ctx.moveTo(canvas.width/2, canvas.height/2 - currentIcebergShape.size/2);
+            ctx.lineTo(canvas.width/2 - currentIcebergShape.size/2, canvas.height/2 + currentIcebergShape.size/2);
+            ctx.lineTo(canvas.width/2 + currentIcebergShape.size/2, canvas.height/2 + currentIcebergShape.size/2);
+            break;
+    }
+
     ctx.fill();
     ctx.closePath();
 }
 
+function isOutsideIceberg(x, y, penguinRadius) {
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const buffer = 3; // 3-pixel buffer
+
+    switch (currentIcebergShape.type) {
+        case 'circle':
+            const distance = Math.sqrt((x - centerX)**2 + (y - centerY)**2);
+            return distance > currentIcebergShape.radius - penguinRadius - buffer;
+        case 'rectangle':
+            return x < centerX - currentIcebergShape.width/2 + penguinRadius + buffer ||
+                   x > centerX + currentIcebergShape.width/2 - penguinRadius - buffer ||
+                   y < centerY - currentIcebergShape.height/2 + penguinRadius + buffer ||
+                   y > centerY + currentIcebergShape.height/2 - penguinRadius - buffer;
+        case 'triangle':
+            const dx = Math.abs(x - centerX);
+            const dy = y - (centerY - currentIcebergShape.size/2);
+            const slope = currentIcebergShape.size / 2;
+            return dy > currentIcebergShape.size/2 - penguinRadius - buffer || 
+                   dx > (slope - dy/2) - penguinRadius - buffer;
+    }
+}
+
 function update() {
     if (gameState === 'playing') {
-        const p1DistanceFromCenter = Math.sqrt((player1.x - canvas.width/2)**2 + (player1.y - canvas.height/2)**2);
-        const p2DistanceFromCenter = Math.sqrt((player2.x - canvas.width/2)**2 + (player2.y - canvas.height/2)**2);
-
-        if (p1DistanceFromCenter > ICEBERG_RADIUS - player1.currentRadius) {
+        if (isOutsideIceberg(player1.x, player1.y, player1.currentRadius)) {
             gameState = 'gameOver';
             player1.removeCrown();
             player2.removeCrown();
@@ -118,7 +170,8 @@ function update() {
             audioManager.playSound('splash');
             scores[winner.name] = (scores[winner.name] || 0) + 1;
             updateLeaderboard();
-        } else if (p2DistanceFromCenter > ICEBERG_RADIUS - player2.currentRadius) {
+            console.log('Game over. Current iceberg shape:', currentIcebergShape.type);
+        } else if (isOutsideIceberg(player2.x, player2.y, player2.currentRadius)) {
             gameState = 'gameOver';
             player1.removeCrown();
             player2.removeCrown();
@@ -127,6 +180,7 @@ function update() {
             audioManager.playSound('splash');
             scores[winner.name] = (scores[winner.name] || 0) + 1;
             updateLeaderboard();
+            console.log('Game over. Current iceberg shape:', currentIcebergShape.type);
         }
 
         player1.update(canvas, gameState, winner, audioManager, scores, updateLeaderboard);
@@ -166,7 +220,7 @@ function update() {
                 if (distance < player.currentRadius + POWERUP_RADIUS) {
                     player.activatePowerUp(powerUp.type);
                     powerUps.splice(index, 1);
-                    setTimeout(() => powerUps.push(new PowerUp(canvas.width, canvas.height)), 5000);
+                    setTimeout(() => powerUps.push(new PowerUp(canvas.width, canvas.height, currentIcebergShape)), 5000);
                 }
             });
         });
@@ -200,7 +254,7 @@ function draw() {
 }
 
 function gameLoop() {
-    console.log('Game loop iteration');
+    console.log('Game loop iteration. Current iceberg shape:', currentIcebergShape.type);
     update();
     draw();
     animationFrameId = requestAnimationFrame(gameLoop);
@@ -224,9 +278,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (e.key === ' ') {
             if (gameState === 'gameOver') {
-                const result = restartGame(player1, player2, gameState, powerUps, canvas);
+                const result = restartGame(player1, player2, gameState, powerUps, canvas, icebergShapes);
                 gameState = result.gameState;
                 powerUps = result.powerUps;
+                currentIcebergShape = result.currentIcebergShape;
+                console.log('Game restarted. New iceberg shape:', currentIcebergShape.type);
                 if (animationFrameId) {
                     cancelAnimationFrame(animationFrameId);
                 }
@@ -243,9 +299,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('restart-game').addEventListener('click', () => {
-        const result = restartGame(player1, player2, gameState, powerUps, canvas);
+        const result = restartGame(player1, player2, gameState, powerUps, canvas, icebergShapes);
         gameState = result.gameState;
         powerUps = result.powerUps;
+        currentIcebergShape = result.currentIcebergShape;
+        console.log('Game restarted. New iceberg shape:', currentIcebergShape.type);
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
         }
@@ -269,4 +327,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('Event listeners set up successfully');
 });
 
+currentIcebergShape = icebergShapes[0];
+console.log('Initial iceberg shape:', currentIcebergShape.type);
 drawIceberg();

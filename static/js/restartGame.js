@@ -1,6 +1,6 @@
 import { PowerUp } from './PowerUp.js';
 
-export function restartGame(player1, player2, gameState, powerUps, canvas) {
+export function restartGame(player1, player2, gameState, powerUps, canvas, icebergShapes) {
     console.log('Restarting game');
     gameState = 'start';
 
@@ -16,11 +16,15 @@ export function restartGame(player1, player2, gameState, powerUps, canvas) {
         player2.vy = 0;
     }
 
-    // Reset power-ups
-    powerUps = [new PowerUp(canvas.width, canvas.height)];
+    // Select a new random iceberg shape
+    const newIcebergShape = icebergShapes[Math.floor(Math.random() * icebergShapes.length)];
+    console.log('Selected new iceberg shape:', newIcebergShape.type);
+
+    // Reset power-ups with the new iceberg shape
+    powerUps = [new PowerUp(canvas.width, canvas.height, newIcebergShape)];
 
     document.getElementById('player-inputs').style.display = 'block';
     document.getElementById('restart-game').style.display = 'none';
 
-    return { gameState, powerUps };
+    return { gameState, powerUps, currentIcebergShape: newIcebergShape };
 }
