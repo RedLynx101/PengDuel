@@ -41,6 +41,92 @@ let gameMode = 'twoPlayer';
 let powerUps = [];
 let animationFrameId;
 
+const icebergShapes = [
+  { name: 'Circle', draw: drawCircleIceberg },
+  { name: 'Square', draw: drawSquareIceberg },
+  { name: 'Triangle', draw: drawTriangleIceberg },
+  { name: 'Irregular', draw: drawIrregularIceberg }
+];
+
+let currentShapeIndex = 0;
+
+function drawCircleIceberg(ctx) {
+  ctx.beginPath();
+  ctx.arc(canvas.width/2, canvas.height/2, ICEBERG_RADIUS, 0, Math.PI * 2);
+  ctx.fillStyle = 'white';
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawSquareIceberg(ctx) {
+  ctx.fillStyle = 'white';
+  ctx.fillRect(canvas.width/2 - ICEBERG_RADIUS, canvas.height/2 - ICEBERG_RADIUS, ICEBERG_RADIUS * 2, ICEBERG_RADIUS * 2);
+}
+
+function drawTriangleIceberg(ctx) {
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2, canvas.height/2 - ICEBERG_RADIUS);
+  ctx.lineTo(canvas.width/2 - ICEBERG_RADIUS, canvas.height/2 + ICEBERG_RADIUS);
+  ctx.lineTo(canvas.width/2 + ICEBERG_RADIUS, canvas.height/2 + ICEBERG_RADIUS);
+  ctx.closePath();
+  ctx.fillStyle = 'white';
+  ctx.fill();
+}
+
+function drawIrregularIceberg(ctx) {
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2 - ICEBERG_RADIUS, canvas.height/2);
+  ctx.lineTo(canvas.width/2 - ICEBERG_RADIUS/2, canvas.height/2 - ICEBERG_RADIUS);
+  ctx.lineTo(canvas.width/2 + ICEBERG_RADIUS/2, canvas.height/2 - ICEBERG_RADIUS/2);
+  ctx.lineTo(canvas.width/2 + ICEBERG_RADIUS, canvas.height/2 + ICEBERG_RADIUS/2);
+  ctx.lineTo(canvas.width/2, canvas.height/2 + ICEBERG_RADIUS);
+  ctx.closePath();
+  ctx.fillStyle = 'white';
+  ctx.fill();
+}
+
+function drawIceberg() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  icebergShapes[currentShapeIndex].draw(ctx);
+}
+
+function isInsideIceberg(x, y) {
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+  switch(currentShapeIndex) {
+    case 0: // Circle
+      return Math.sqrt((x - centerX)**2 + (y - centerY)**2) <= ICEBERG_RADIUS;
+    case 1: // Square
+      return Math.abs(x - centerX) <= ICEBERG_RADIUS && Math.abs(y - centerY) <= ICEBERG_RADIUS;
+    case 2: // Triangle
+      const dx = Math.abs(x - centerX);
+      const dy = y - (centerY + ICEBERG_RADIUS);
+      return dx <= ICEBERG_RADIUS && dy <= -2 * ICEBERG_RADIUS * (dx / ICEBERG_RADIUS - 1);
+    case 3: // Irregular
+      // Define points for the irregular shape
+      const points = [
+        {x: centerX - ICEBERG_RADIUS, y: centerY},
+        {x: centerX - ICEBERG_RADIUS/2, y: centerY - ICEBERG_RADIUS},
+        {x: centerX + ICEBERG_RADIUS/2, y: centerY - ICEBERG_RADIUS/2},
+        {x: centerX + ICEBERG_RADIUS, y: centerY + ICEBERG_RADIUS/2},
+        {x: centerX, y: centerY + ICEBERG_RADIUS}
+      ];
+      return isPointInPolygon(x, y, points);
+  }
+}
+
+// Helper function for irregular shape
+function isPointInPolygon(x, y, points) {
+  let inside = false;
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const xi = points[i].x, yi = points[i].y;
+    const xj = points[j].x, yj = points[j].y;
+    const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
 function init() {
     console.log('Game initialization started');
     const player1Name = document.getElementById('player1-name').value || 'Player 1';
@@ -94,14 +180,10 @@ function init() {
     }
 
     animationFrameId = requestAnimationFrame(gameLoop);
-}
 
-function drawIceberg() {
-    ctx.beginPath();
-    ctx.arc(canvas.width/2, canvas.height/2, ICEBERG_RADIUS, 0, Math.PI * 2);
-    ctx.fillStyle = 'white';
-    ctx.fill();
-    ctx.closePath();
+    document.querySelectorAll('.map-selector button').forEach(button => {
+      button.disabled = true;
+    });
 }
 
 function update() {
@@ -109,7 +191,7 @@ function update() {
         const p1DistanceFromCenter = Math.sqrt((player1.x - canvas.width/2)**2 + (player1.y - canvas.height/2)**2);
         const p2DistanceFromCenter = Math.sqrt((player2.x - canvas.width/2)**2 + (player2.y - canvas.height/2)**2);
 
-        if (p1DistanceFromCenter > ICEBERG_RADIUS - player1.currentRadius) {
+        if (!isInsideIceberg(player1.x, player1.y)) {
             gameState = 'gameOver';
             player1.removeCrown();
             player2.removeCrown();
@@ -118,7 +200,7 @@ function update() {
             audioManager.playSound('splash');
             scores[winner.name] = (scores[winner.name] || 0) + 1;
             updateLeaderboard();
-        } else if (p2DistanceFromCenter > ICEBERG_RADIUS - player2.currentRadius) {
+        } else if (!isInsideIceberg(player2.x, player2.y)) {
             gameState = 'gameOver';
             player1.removeCrown();
             player2.removeCrown();
@@ -264,6 +346,16 @@ document.addEventListener('DOMContentLoaded', () => {
         gameMode = 'twoPlayer';
         document.getElementById('player2-name').style.display = 'inline-block';
         document.getElementById('player2-label').textContent = 'Player 2 Name:';
+    });
+
+    // Add event listeners for map selector buttons
+    document.querySelectorAll('.map-selector button').forEach((button, index) => {
+        button.addEventListener('click', () => {
+            if (gameState !== 'playing') {
+                currentShapeIndex = index;
+                drawIceberg();
+            }
+        });
     });
 
     console.log('Event listeners set up successfully');

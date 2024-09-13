@@ -74,3 +74,29 @@ button:hover {
 label {
     margin-right: 5px;
 }
+
+.map-selector {
+    display: flex;
+    flex-direction: column;
+    margin-right: 20px;
+}
+
+.map-selector button {
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 14px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.map-selector button:hover {
+    background-color: #45a049;
+}
+
+.map-selector button.active {
+    background-color: #45a049;
+    font-weight: bold;
+}
