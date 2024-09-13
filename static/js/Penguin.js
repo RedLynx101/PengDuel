@@ -14,6 +14,8 @@ export class Penguin {
         this.originalMass = 1;
         this.currentRadius = this.originalRadius;
         this.mass = this.originalMass;
+        this.originalAccelaration = 1.5;
+        this.currentAcceleration = this.originalAccelaration;
         this.powerUpActive = false;
         this.powerUpType = null;
         this.powerUpEndTime = 0;
@@ -101,18 +103,22 @@ export class Penguin {
         this.powerUpEndTime = Date.now() + 10000; // 10 seconds
 
         if (type === 'speed') {
-            this.vx *= 2.5; // Increased speed boost
-            this.vy *= 2.5;
+            // Increased speed boost
+            this.currentAcceleration = this.originalAccelaration * 1.5;
+            this.currentRadius = this.originalRadius / 2;
+            this.mass = this.originalMass / 1.2;
         } else if (type === 'size') {
-            this.currentRadius = this.originalRadius * 1.5;
-            this.mass = this.originalMass * 2;
+            this.currentRadius = this.originalRadius * 2.4;
+            this.mass = this.originalMass * 2.4;
+            this.currentAcceleration = this.originalAccelaration * 0.8;
         }
     }
 
     deactivatePowerUp() {
         if (this.powerUpType === 'speed') {
-            this.vx /= 2.5; // Match the increased speed boost
-            this.vy /= 2.5;
+            this.currentAcceleration = this.originalAccelaration;
+            this.currentRadius = this.originalRadius;
+            this.mass = this.originalMass;
         } else if (this.powerUpType === 'size') {
             this.currentRadius = this.originalRadius;
             this.mass = this.originalMass;

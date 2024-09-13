@@ -5,12 +5,16 @@ import { restartGame } from './restartGame.js';
 
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-export const ICEBERG_RADIUS = 250;
-export const PENGUIN_RADIUS = 20;
-export const PUSH_FORCE = 8.0;
-export const FRICTION = 0.98;
+
+// Game constants (now modifiable)
+export let ICEBERG_RADIUS = 250;
+export let PENGUIN_RADIUS = 20;
+export let PUSH_FORCE = 6.0;
+export let FRICTION = 0.98;
+
 export const POWERUP_RADIUS = 15;
 export const POWERUP_DURATION = 10000; // 10 seconds
+
 let penguinSVG;
 fetch('/static/assets/penguin.svg')
   .then(response => response.text())
@@ -21,6 +25,7 @@ fetch('/static/assets/penguin.svg')
   .catch(error => {
     console.error('Error loading penguin SVG:', error);
   });
+
 const scores = {};
 function updateLeaderboard() {
   const leaderboardDiv = document.getElementById('leaderboard');
@@ -29,12 +34,14 @@ function updateLeaderboard() {
     leaderboardDiv.innerHTML += `<p>${name}: ${score}</p>`;
   });
 }
+
 let gameState = 'start';
 let player1, player2;
 let winner = null;
 let gameMode = 'twoPlayer';
 let powerUps = [];
 let animationFrameId;
+
 function init() {
     console.log('Game initialization started');
     const player1Name = document.getElementById('player1-name').value || 'Player 1';
@@ -76,6 +83,7 @@ function init() {
     }
     animationFrameId = requestAnimationFrame(gameLoop);
 }
+
 function drawIceberg() {
     ctx.beginPath();
     ctx.arc(canvas.width/2, canvas.height/2, ICEBERG_RADIUS, 0, Math.PI * 2);
@@ -138,7 +146,7 @@ function update() {
                     player.activatePowerUp(powerUp.type);
                     powerUps.splice(index, 1);
                     setTimeout(() => powerUps.push(new PowerUp(canvas.width, canvas.height)), 5000);
-                    audioManager.playSound('powerup'); // Play the new power-up sound
+                    audioManager.playSound('powerup');
                 }
             });
         });
@@ -171,26 +179,26 @@ function draw() {
     }
 }
 
-
 function gameLoop() {
     console.log('Game loop iteration');
     update();
     draw();
     animationFrameId = requestAnimationFrame(gameLoop);
 }
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM content loaded, setting up event listeners');
     document.addEventListener('keydown', (e) => {
         if (gameState === 'playing') {
             switch(e.key) {
-                case 'w': player1.vy -= 1; break;
-                case 's': player1.vy += 1; break;
-                case 'a': player1.vx -= 1; break;
-                case 'd': player1.vx += 1; break;
-                case 'ArrowUp': if (gameMode === 'twoPlayer') player2.vy -= 1; break;
-                case 'ArrowDown': if (gameMode === 'twoPlayer') player2.vy += 1; break;
-                case 'ArrowLeft': if (gameMode === 'twoPlayer') player2.vx -= 1; break;
-                case 'ArrowRight': if (gameMode === 'twoPlayer') player2.vx += 1; break;
+                case 'w': player1.vy -= player1.currentAcceleration; break;
+                case 's': player1.vy += player1.currentAcceleration; break;
+                case 'a': player1.vx -= player1.currentAcceleration; break;
+                case 'd': player1.vx += player1.currentAcceleration; break;
+                case 'ArrowUp': if (gameMode === 'twoPlayer') player2.vy -= player2.currentAcceleration; break;
+                case 'ArrowDown': if (gameMode === 'twoPlayer') player2.vy += player2.currentAcceleration; break;
+                case 'ArrowLeft': if (gameMode === 'twoPlayer') player2.vx -= player2.currentAcceleration; break;
+                case 'ArrowRight': if (gameMode === 'twoPlayer') player2.vx += player2.currentAcceleration; break;
             }
         }
         if (e.key === ' ') {
@@ -232,6 +240,33 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('player2-name').style.display = 'inline-block';
         document.getElementById('player2-label').textContent = 'Player 2 Name:';
     });
+
+    // New event listeners for game constants menu
+    document.getElementById('toggle-constants-menu').addEventListener('click', () => {
+        const menu = document.getElementById('game-constants-menu');
+        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('apply-constants').addEventListener('click', () => {
+        ICEBERG_RADIUS = Number(document.getElementById('iceberg-radius').value);
+        PENGUIN_RADIUS = Number(document.getElementById('penguin-radius').value);
+        PUSH_FORCE = Number(document.getElementById('push-force').value);
+        FRICTION = Number(document.getElementById('friction').value);
+
+        // Update penguin sizes
+        if (player1) player1.currentRadius = PENGUIN_RADIUS;
+        if (player2) player2.currentRadius = PENGUIN_RADIUS;
+
+        console.log('Game constants updated:', { ICEBERG_RADIUS, PENGUIN_RADIUS, PUSH_FORCE, FRICTION });
+    });
+
+    // Initialize input fields with current values
+    document.getElementById('iceberg-radius').value = ICEBERG_RADIUS;
+    document.getElementById('penguin-radius').value = PENGUIN_RADIUS;
+    document.getElementById('push-force').value = PUSH_FORCE;
+    document.getElementById('friction').value = FRICTION;
+
     console.log('Event listeners set up successfully');
 });
+
 drawIceberg();
