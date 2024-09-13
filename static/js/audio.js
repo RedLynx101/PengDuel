@@ -19,7 +19,6 @@ class AudioManager {
             console.error(`AudioManager: Error loading sound '${name}':`, error);
         }
     }
-
     setVolume(name, volume) {
         console.log(`AudioManager: Setting volume for '${name}' to ${volume}`);
         if (this.sounds[name]) {
@@ -49,6 +48,7 @@ class AudioManager {
         }
     }
 
+
     stopBackgroundMusic() {
         console.log('AudioManager: Stopping background music');
         if (this.backgroundMusic) {
@@ -56,7 +56,6 @@ class AudioManager {
             this.backgroundMusic = null;
         }
     }
-
     playBackgroundMusic(name) {
         console.log(`AudioManager: Attempting to play background music '${name}'`);
         this.stopBackgroundMusic(); // Stop existing music
@@ -84,3 +83,5 @@ audioManager.loadSound('collision', '/static/assets/collision.mp3').then(() => {
 });
 audioManager.loadSound('beep', '/static/assets/beep.mp3');
 audioManager.loadSound('background', '/static/assets/iceberg.mp3');
+audioManager.loadSound('powerup', '/static/assets/powerup.mp3');
+

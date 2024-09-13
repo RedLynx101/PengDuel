@@ -21,18 +21,17 @@ export class Penguin {
         this.loadSVG(penguinSVG);
     }
 
+
     loadSVG(penguinSVG) {
         if (penguinSVG) {
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(penguinSVG, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
-
             svgElement.querySelectorAll('circle, path').forEach(element => {
                 if (element.getAttribute('fill') !== '#FFFFFF') {
                     element.setAttribute('fill', this.color);
                 }
             });
-
             const svgString = new XMLSerializer().serializeToString(svgElement);
             const img = new Image();
             img.onload = () => {
@@ -45,20 +44,16 @@ export class Penguin {
             img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
         }
     }
-
     update(canvas, gameState, winner, audioManager, scores, updateLeaderboard) {
         this.x += this.vx;
         this.y += this.vy;
         this.vx *= FRICTION;
         this.vy *= FRICTION;
-
         if (this.powerUpActive && Date.now() > this.powerUpEndTime) {
             this.deactivatePowerUp();
         }
-
         return gameState;
     }
-
     draw(ctx) {
         console.log(`Drawing penguin: ${this.name}, position: (${this.x}, ${this.y})`);
         if (this.svgImage) {
@@ -72,14 +67,12 @@ export class Penguin {
         }
         this.drawNameAndCrown(ctx);
     }
-
     drawNameAndCrown(ctx) {
         console.log(`Drawing name and crown for ${this.name}, crowned: ${this.crowned}`);
         ctx.fillStyle = 'black';
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(this.name, this.x, this.y + this.currentRadius + 20);
-
         if (this.crowned) {
             console.log(`Drawing crown for ${this.name}`);
             ctx.beginPath();
@@ -93,7 +86,6 @@ export class Penguin {
             ctx.lineWidth = 2;
             ctx.stroke();
         }
-
         if (this.powerUpActive) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.currentRadius + 5, 0, Math.PI * 2);
@@ -109,8 +101,8 @@ export class Penguin {
         this.powerUpEndTime = Date.now() + 10000; // 10 seconds
 
         if (type === 'speed') {
-            this.vx *= 2;
-            this.vy *= 2;
+            this.vx *= 2.5; // Increased speed boost
+            this.vy *= 2.5;
         } else if (type === 'size') {
             this.currentRadius = this.originalRadius * 1.5;
             this.mass = this.originalMass * 2;
@@ -119,8 +111,8 @@ export class Penguin {
 
     deactivatePowerUp() {
         if (this.powerUpType === 'speed') {
-            this.vx /= 2;
-            this.vy /= 2;
+            this.vx /= 2.5; // Match the increased speed boost
+            this.vy /= 2.5;
         } else if (this.powerUpType === 'size') {
             this.currentRadius = this.originalRadius;
             this.mass = this.originalMass;
@@ -129,11 +121,11 @@ export class Penguin {
         this.powerUpType = null;
     }
 
+
     setCrowned(crowned) {
         console.log(`Setting crowned status for ${this.name}: ${crowned}`);
         this.crowned = crowned;
     }
-
     removeCrown() {
         this.crowned = false;
     }
