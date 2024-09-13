@@ -192,15 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 case 's': player1.vy += player1.currentAcceleration; break;
                 case 'a': player1.vx -= player1.currentAcceleration; break;
                 case 'd': player1.vx += player1.currentAcceleration; break;
-                    
-                case 'ArrowUp': if (gameMode === 'twoPlayer') player2.vy -= player2.currentAcceleration; else player1.vy -= player1.currentAcceleration; break;
-                case 'ArrowDown': if (gameMode === 'twoPlayer') player2.vy += player2.currentAcceleration; else player1.vy += player1.currentAcceleration; break;
-                case 'ArrowLeft': if (gameMode === 'twoPlayer') player2.vx -= player2.currentAcceleration; else player1.vx -= player1.currentAcceleration; break;
-                case 'ArrowRight': if (gameMode === 'twoPlayer') player2.vx += player2.currentAcceleration; else player1.vx += player1.currentAcceleration; break;
-                
+                case 'ArrowUp': if (gameMode === 'twoPlayer') player2.vy -= player2.currentAcceleration; break;
+                case 'ArrowDown': if (gameMode === 'twoPlayer') player2.vy += player2.currentAcceleration; break;
+                case 'ArrowLeft': if (gameMode === 'twoPlayer') player2.vx -= player2.currentAcceleration; break;
+                case 'ArrowRight': if (gameMode === 'twoPlayer') player2.vx += player2.currentAcceleration; break;
             }
         }
-        
         if (e.key === ' ') {
             if (gameState === 'gameOver') {
                 const result = restartGame(player1, player2, gameState, powerUps, canvas);

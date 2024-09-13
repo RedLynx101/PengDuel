@@ -109,29 +109,3 @@ label {
 #toggle-constants-menu {
     margin-top: 10px;
 }
-
-/* Error pages */
-#error-container {
-    text-align: center;
-    background-color: rgba(255, 255, 255, 0.8);
-    padding: 20px;
-    border-radius: 10px;
-}
-
-#error-container h1 {
-    color: #FF4136;
-}
-
-#error-container a {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #0074D9;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-#error-container a:hover {
-    background-color: #7FDBFF;
-}

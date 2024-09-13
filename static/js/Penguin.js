@@ -110,8 +110,8 @@ export class Penguin {
             this.currentRadius = this.originalRadius / 2;
             this.mass = this.originalMass / 1.2;
         } else if (type === 'size') {
-            this.currentRadius = this.originalRadius * 2.5;
-            this.mass = this.originalMass * 2.5;
+            this.currentRadius = this.originalRadius * 2.4;
+            this.mass = this.originalMass * 2.4;
             this.currentAcceleration = this.originalAccelaration * 0.8;
         }
     }
