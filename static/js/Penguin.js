@@ -23,12 +23,17 @@ export class Penguin {
         this.loadSVG(penguinSVG);
     }
 
+
     loadSVG(penguinSVG) {
         if (penguinSVG) {
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(penguinSVG, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
-            this.updateSVGColor(svgElement);
+            svgElement.querySelectorAll('circle, path').forEach(element => {
+                if (element.getAttribute('fill') !== '#FFFFFF') {
+                    element.setAttribute('fill', this.color);
+                }
+            });
             const svgString = new XMLSerializer().serializeToString(svgElement);
             const img = new Image();
             img.onload = () => {
@@ -41,61 +46,93 @@ export class Penguin {
             img.src = 'data:image/svg+xml;base64,' + btoa(svgString);
         }
     }
-
-    updateSVGColor(svgElement) {
-        svgElement.querySelectorAll('circle, path').forEach(element => {
-            if (element.getAttribute('fill') !== '#FFFFFF') {
-                element.setAttribute('fill', this.color);
-            }
-        });
+    update(canvas, gameState, winner, audioManager, scores, updateLeaderboard) {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vx *= FRICTION;
+        this.vy *= FRICTION;
+        if (this.powerUpActive && Date.now() > this.powerUpEndTime) {
+            this.deactivatePowerUp();
+        }
+        return gameState;
     }
-
-    updateColor(newColor) {
-        this.color = newColor;
+    draw(ctx) {
+        console.log(`Drawing penguin: ${this.name}, position: (${this.x}, ${this.y})`);
         if (this.svgImage) {
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(this.svgImage.src, 'image/svg+xml');
-            const svgElement = svgDoc.documentElement;
-            this.updateSVGColor(svgElement);
-            const svgString = new XMLSerializer().serializeToString(svgElement);
-            this.svgImage.src = 'data:image/svg+xml;base64,' + btoa(svgString);
+            ctx.drawImage(this.svgImage, this.x - this.currentRadius, this.y - this.currentRadius, this.currentRadius * 2, this.currentRadius * 2);
+        } else {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.currentRadius, 0, Math.PI * 2);
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.closePath();
+        }
+        this.drawNameAndCrown(ctx);
+    }
+    drawNameAndCrown(ctx) {
+        console.log(`Drawing name and crown for ${this.name}, crowned: ${this.crowned}`);
+        ctx.fillStyle = 'black';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(this.name, this.x, this.y + this.currentRadius + 20);
+        if (this.crowned) {
+            console.log(`Drawing crown for ${this.name}`);
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y - this.currentRadius - 15);
+            ctx.lineTo(this.x - 15, this.y - this.currentRadius);
+            ctx.lineTo(this.x + 15, this.y - this.currentRadius);
+            ctx.closePath();
+            ctx.fillStyle = 'gold';
+            ctx.fill();
+            ctx.strokeStyle = 'black';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        if (this.powerUpActive) {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.currentRadius + 5, 0, Math.PI * 2);
+            ctx.strokeStyle = this.powerUpType === 'speed' ? 'yellow' : 'green';
+            ctx.lineWidth = 3;
+            ctx.stroke();
         }
     }
 
+    activatePowerUp(type) {
+        this.powerUpActive = true;
+        this.powerUpType = type;
+        this.powerUpEndTime = Date.now() + 10000; // 10 seconds
 
-activatePowerUp(type) {
-    this.powerUpActive = true;
-    this.powerUpType = type;
-    this.powerUpEndTime = Date.now() + 10000; // 10 seconds
-    if (type === 'speed') {
-        // Increased speed boost
-        this.currentAcceleration = this.originalAccelaration * 1.5;
-        this.currentRadius = this.originalRadius / 2;
-        this.mass = this.originalMass / 1.2;
-    } else if (type === 'size') {
-        this.currentRadius = this.originalRadius * 2.4;
-        this.mass = this.originalMass * 2.4;
-        this.currentAcceleration = this.originalAccelaration * 0.8;
+        if (type === 'speed') {
+            // Increased speed boost
+            this.currentAcceleration = this.originalAccelaration * 1.5;
+            this.currentRadius = this.originalRadius / 2;
+            this.mass = this.originalMass / 1.2;
+        } else if (type === 'size') {
+            this.currentRadius = this.originalRadius * 2.4;
+            this.mass = this.originalMass * 2.4;
+            this.currentAcceleration = this.originalAccelaration * 0.8;
+        }
     }
-}
-deactivatePowerUp() {
-    if (this.powerUpType === 'speed') {
-        this.currentAcceleration = this.originalAccelaration;
-        this.currentRadius = this.originalRadius;
-        this.mass = this.originalMass;
-    } else if (this.powerUpType === 'size') {
-        this.currentRadius = this.originalRadius;
-        this.mass = this.originalMass;
-        this.currentAcceleration = this.originalAccelaration;
+
+    deactivatePowerUp() {
+        if (this.powerUpType === 'speed') {
+            this.currentAcceleration = this.originalAccelaration;
+            this.currentRadius = this.originalRadius;
+            this.mass = this.originalMass;
+        } else if (this.powerUpType === 'size') {
+            this.currentRadius = this.originalRadius;
+            this.mass = this.originalMass;
+        }
+        this.powerUpActive = false;
+        this.powerUpType = null;
     }
-    this.powerUpActive = false;
-    this.powerUpType = null;
-}
-setCrowned(crowned) {
-    console.log(`Setting crowned status for ${this.name}: ${crowned}`);
-    this.crowned = crowned;
-}
-removeCrown() {
-    this.crowned = false;
-}
+
+
+    setCrowned(crowned) {
+        console.log(`Setting crowned status for ${this.name}: ${crowned}`);
+        this.crowned = crowned;
+    }
+    removeCrown() {
+        this.crowned = false;
+    }
 }
