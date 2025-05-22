@@ -51,15 +51,15 @@ function init() {
     console.log(`Initializing players: ${player1Name} (${player1Color}) and ${player2Name} (${player2Color})`);
     const prevPlayer1Crowned = player1 ? player1.crowned : false;
     const prevPlayer2Crowned = player2 ? player2.crowned : false;
-    player1 = new Penguin(canvas.width/2 - 50, canvas.height/2, player1Color, player1Name, penguinSVG);
+    player1 = new Penguin(canvas.width/2 - 50, canvas.height/2, player1Color, player1Name, penguinSVG, audioManager);
     player1.vx = 0;
     player1.vy = 0;
 
     if (gameMode === 'singlePlayer') {
-        player2 = new AIPenguin(canvas.width/2 + 50, canvas.height/2, player2Color, player2Name, penguinSVG);
+        player2 = new AIPenguin(canvas.width/2 + 50, canvas.height/2, player2Color, player2Name, penguinSVG, audioManager);
         player2.reset();
     } else {
-        player2 = new Penguin(canvas.width/2 + 50, canvas.height/2, player2Color, player2Name, penguinSVG);
+        player2 = new Penguin(canvas.width/2 + 50, canvas.height/2, player2Color, player2Name, penguinSVG, audioManager);
         player2.vx = 0;
         player2.vy = 0;
     }

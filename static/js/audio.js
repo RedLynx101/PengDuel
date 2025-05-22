@@ -84,4 +84,5 @@ audioManager.loadSound('collision', '/static/assets/collision.mp3').then(() => {
 audioManager.loadSound('beep', '/static/assets/beep.mp3');
 audioManager.loadSound('background', '/static/assets/iceberg.mp3');
 audioManager.loadSound('powerup', '/static/assets/powerup.mp3');
+audioManager.loadSound('speedBoostCollected', '/static/assets/speedboost.mp3');
 

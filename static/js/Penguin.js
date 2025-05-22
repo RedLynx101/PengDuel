@@ -1,7 +1,7 @@
-import { PENGUIN_RADIUS, ICEBERG_RADIUS, FRICTION, PUSH_FORCE } from './game.js';
+import { PENGUIN_RADIUS, ICEBERG_RADIUS, FRICTION, PUSH_FORCE, POWERUP_DURATION } from './game.js';
 
 export class Penguin {
-    constructor(x, y, color, name, penguinSVG) {
+    constructor(x, y, color, name, penguinSVG, audioManager) { // Added audioManager
         console.log(`Penguin constructor called for ${name}`);
         this.x = x;
         this.y = y;
@@ -14,12 +14,13 @@ export class Penguin {
         this.originalMass = 1;
         this.currentRadius = this.originalRadius;
         this.mass = this.originalMass;
-        this.originalAccelaration = 1.5;
-        this.currentAcceleration = this.originalAccelaration;
+        this.originalAcceleration = 1.5; // Corrected typo: Accelaration -> Acceleration
+        this.currentAcceleration = this.originalAcceleration;
         this.powerUpActive = false;
         this.powerUpType = null;
         this.powerUpEndTime = 0;
         this.svgImage = null;
+        this.audioManager = audioManager; // Store audioManager
         this.loadSVG(penguinSVG);
     }
 
@@ -93,7 +94,7 @@ export class Penguin {
         if (this.powerUpActive) {
             ctx.beginPath();
             ctx.arc(this.x, this.y, this.currentRadius + 5, 0, Math.PI * 2);
-            ctx.strokeStyle = this.powerUpType === 'speed' ? 'yellow' : 'green';
+            ctx.strokeStyle = (this.powerUpType === 'speed' || this.powerUpType === 'speedBoost') ? 'yellow' : 'green';
             ctx.lineWidth = 3;
             ctx.stroke();
         }
@@ -102,29 +103,37 @@ export class Penguin {
     activatePowerUp(type) {
         this.powerUpActive = true;
         this.powerUpType = type;
-        this.powerUpEndTime = Date.now() + 10000; // 10 seconds
+        this.powerUpEndTime = Date.now() + POWERUP_DURATION; // Use imported POWERUP_DURATION
 
         if (type === 'speed') {
             // Increased speed boost
-            this.currentAcceleration = this.originalAccelaration * 1.5;
+            this.currentAcceleration = this.originalAcceleration * 1.5; // Corrected typo
             this.currentRadius = this.originalRadius / 2;
             this.mass = this.originalMass / 1.2;
         } else if (type === 'size') {
             this.currentRadius = this.originalRadius * 2.4;
             this.mass = this.originalMass * 2.4;
-            this.currentAcceleration = this.originalAccelaration * 0.8;
+            this.currentAcceleration = this.originalAcceleration * 0.8; // Corrected typo
+        } else if (type === 'speedBoost') {
+            this.currentAcceleration = this.originalAcceleration * 1.5; // Apply speed boost
+            if (this.audioManager) {
+                this.audioManager.playSound('speedBoostCollected');
+            }
+            // Potentially other effects for speedBoost, e.g., change radius or mass if desired
         }
     }
 
     deactivatePowerUp() {
         if (this.powerUpType === 'speed') {
-            this.currentAcceleration = this.originalAccelaration;
+            this.currentAcceleration = this.originalAcceleration; // Corrected typo
             this.currentRadius = this.originalRadius;
             this.mass = this.originalMass;
         } else if (this.powerUpType === 'size') {
             this.currentRadius = this.originalRadius;
             this.mass = this.originalMass;
-            this.currentAcceleration = this.originalAccelaration;
+            this.currentAcceleration = this.originalAcceleration; // Corrected typo
+        } else if (this.powerUpType === 'speedBoost') {
+            this.currentAcceleration = this.originalAcceleration; // Reset speed boost effect
         }
         this.powerUpActive = false;
         this.powerUpType = null;

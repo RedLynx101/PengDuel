@@ -2,8 +2,8 @@ import { Penguin } from './Penguin.js';
 import { PENGUIN_RADIUS, ICEBERG_RADIUS } from './game.js';
 
 export class AIPenguin extends Penguin {
-    constructor(x, y, color, name, penguinSVG) {
-        super(x, y, color, name, penguinSVG);
+    constructor(x, y, color, name, penguinSVG, audioManager) { // Added audioManager
+        super(x, y, color, name, penguinSVG, audioManager); // Pass audioManager to super
         console.log(`AIPenguin constructor called for ${name}, SVG passed: ${!!penguinSVG}`);
         this.initialX = x;
         this.initialY = y;

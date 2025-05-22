@@ -10,7 +10,8 @@ export class PowerUp {
         const distance = Math.random() * (ICEBERG_RADIUS - POWERUP_RADIUS - 20);
         this.x = canvasWidth / 2 + Math.cos(angle) * distance;
         this.y = canvasHeight / 2 + Math.sin(angle) * distance;
-        this.type = Math.random() < 0.5 ? 'speed' : 'size';
+        this.powerUpTypes = ['speed', 'size', 'speedBoost'];
+        this.type = this.powerUpTypes[Math.floor(Math.random() * this.powerUpTypes.length)];
         this.animationFrame = 0;
     }
 
@@ -22,14 +23,16 @@ export class PowerUp {
             gradient.addColorStop(0, 'yellow');
             gradient.addColorStop(1, 'orange');
             ctx.fillStyle = gradient;
-        } else {
+        } else if (this.type === 'size') {
             ctx.fillStyle = 'green';
+        } else if (this.type === 'speedBoost') {
+            ctx.fillStyle = 'yellow';
         }
         ctx.fill();
         ctx.closePath();
 
         // Add pulsating effect for speed power-up
-        if (this.type === 'speed') {
+        if (this.type === 'speed' || this.type === 'speedBoost') {
             this.animationFrame += 0.1;
             const pulseFactor = 1 + Math.sin(this.animationFrame) * 0.2;
             ctx.beginPath();
