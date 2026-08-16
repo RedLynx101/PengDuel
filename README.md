@@ -40,7 +40,7 @@ poetry run python main.py
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install "flask==3.0.3"
+python -m pip install "flask==3.1.3"
 python main.py
 ```
 
