@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "repl-nix-pengduel"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
+description = "A local browser physics game built with Flask, JavaScript, and HTML Canvas."
+authors = ["Noah Hicks"]
 readme = "README.md"
 
 [tool.poetry.dependencies]

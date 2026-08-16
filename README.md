@@ -1,64 +1,71 @@
 # PengDuel
 
-PengDuel is a web-based two-player penguin fighting game built using Flask and JavaScript with HTML5 Canvas.
+PengDuel is a small browser physics game maintained by Noah Hicks. Two penguins share an iceberg;
+the first one pushed beyond the edge loses the round. The Flask server delivers the page while the
+game loop, collision physics, AI opponent, power-ups, sound, and drawing run in the browser with
+JavaScript and HTML Canvas.
 
-## Features
+Play the public build: <https://peng-duel-noahhicks101.replit.app/>
 
-- Single-player mode against AI
-- Two-player mode
-- Power-ups and obstacles
-- Leaderboard to track wins
-- Customizable game constants
+## What works
 
-## Prerequisites
+- single-player rounds against a lightweight steering AI;
+- local two-player rounds using one keyboard;
+- collision-based pushing and friction;
+- speed and size power-ups;
+- a session-only score that resets when the page reloads; and
+- adjustable iceberg, penguin, force, and friction values.
 
-- Python 3.7+
-- pip (Python package manager)
+This is a compact game prototype, not an account-backed or persistent multiplayer service. The
+score is kept in browser memory, and two-player mode is local to one keyboard.
 
-## Installation
+## Controls
 
-1. Clone the repository:
-   ```
-   git clone https://github.com/redlynx101/pengduel.git
-   cd pengduel
-   ```
+- Player 1: `W`, `A`, `S`, `D`
+- Player 2: arrow keys
+- Start a configured round: **Start game**
+- Restart after a round: **Restart round**
 
-## Running the Application
+## Run locally
 
-### Development
+### Poetry
 
-To run the application in development mode:
-
+```powershell
+poetry install
+poetry run python main.py
 ```
+
+### Standard Python environment
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install "flask==3.0.3"
 python main.py
 ```
 
-The application will be available at `http://localhost:5000`.
+Open <http://127.0.0.1:5000>. The production process uses `gunicorn wsgi:app` on platforms that
+support Gunicorn.
 
-### Production
+## Verify the server surface
 
-For production deployment, I recommend using Gunicorn as the WSGI server:
+```powershell
+python -m unittest discover -s tests -v
+```
 
-1. Install Gunicorn:
-   ```
-   pip install gunicorn
-   ```
+The test checks that the Flask route loads and exposes the expected game modes, canvas, and control
+instructions. Gameplay still requires a real browser because it depends on Canvas, audio, animation
+frames, and keyboard input.
 
-2. Run the application:
-   ```
-   gunicorn -w 4 -b 0.0.0.0:5000 main:app
-   ```
+## Authorship and assets
 
-   This command starts 4 worker processes and binds the application to all network interfaces on port 5000.
+The repository is maintained under Noah Hicks's GitHub account, and its history includes
+Replit Agent-assisted iterations. The bundled SVG and audio files are part of the current public
+build, but their original provenance is not documented well enough to grant downstream reuse
+rights. Treat them as demonstration assets unless that provenance is resolved.
 
-## Deployment
+## Public access and reuse
 
-This application is ready for deployment on platforms like Heroku, AWS, or DigitalOcean. Make sure to set the necessary environment variables on your deployment platform.
-
-## Contributing
-
-Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+The source is publicly viewable. The repository does not currently contain a license file, so it
+should not be described as MIT licensed and public visibility should not be interpreted as broad
+reuse permission.

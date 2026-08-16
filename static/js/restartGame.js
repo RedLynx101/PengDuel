@@ -1,7 +1,6 @@
 import { PowerUp } from './PowerUp.js';
 
 export function restartGame(player1, player2, gameState, powerUps, canvas) {
-    console.log('Restarting game');
     gameState = 'start';
 
     if (player1) {
@@ -19,8 +18,8 @@ export function restartGame(player1, player2, gameState, powerUps, canvas) {
     // Reset power-ups
     powerUps = [new PowerUp(canvas.width, canvas.height)];
 
-    document.getElementById('player-inputs').style.display = 'block';
-    document.getElementById('restart-game').style.display = 'none';
+    document.getElementById('setup-panel').hidden = false;
+    document.getElementById('restart-game').hidden = true;
 
     return { gameState, powerUps };
 }

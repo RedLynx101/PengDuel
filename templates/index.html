@@ -3,50 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PengDuel is a local browser physics game about pushing an opponent off an iceberg.">
     <title>PengDuel</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 </head>
 <body>
-    <div id="game-container">
-        <br><br><br>
-        <h1>PengDuel</h1>
-        <div id="game-area">
-            <canvas id="gameCanvas" width="800" height="600"></canvas>
-            <div id="leaderboard"></div>
-        </div>
-        <div id="game-mode-selection">
-            <button id="single-player">Single Player</button>
-            <button id="two-player">Two Players</button>
-        </div>
-        <div id="player-inputs">
-            <label for="player1-name">Player 1 Name:</label>
-            <input type="text" id="player1-name" placeholder="Player 1 Name">
-            <label for="player1-color">Player 1 Color:</label>
-            <input type="color" id="player1-color" value="#0000FF">
-            <label id="player2-label" for="player2-name">Player 2 Name:</label>
-            <input type="text" id="player2-name" placeholder="Player 2 Name">
-            <label for="player2-color">Player 2 Color:</label>
-            <input type="color" id="player2-color" value="#FF0000">
-            <button id="start-game">Start Game</button>
-        </div>
-        <button id="restart-game" style="display: none;">Restart Game</button>
-        
-        <!-- Game constants menu -->
-        <div id="game-constants-menu" style="display: none;">
-            <h3>Game Constants</h3>
-            <label for="iceberg-radius">Iceberg Radius:</label>
-            <input type="number" id="iceberg-radius" min="100" max="400" step="10">
-            <label for="penguin-radius">Penguin Radius:</label>
-            <input type="number" id="penguin-radius" min="10" max="40" step="1">
-            <label for="push-force">Push Force:</label>
-            <input type="number" id="push-force" min="1" max="10" step="0.1">
-            <label for="friction">Friction:</label>
-            <input type="number" id="friction" min="0.9" max="0.99" step="0.01">
-            <button id="apply-constants">Apply Changes</button>
-        </div>
-        <button id="toggle-constants-menu">Toggle Game Constants Menu</button>
-    </div>
+    <main id="game-container">
+        <header class="game-header">
+            <p class="eyebrow">Browser physics game</p>
+            <h1>PengDuel</h1>
+            <p class="intro">Stay on the iceberg. Push the other penguin off first.</p>
+        </header>
+
+        <section id="game-area" aria-label="PengDuel play area">
+            <div class="arena-shell">
+                <canvas
+                    id="gameCanvas"
+                    width="800"
+                    height="600"
+                    role="img"
+                    aria-label="PengDuel iceberg arena"
+                    aria-describedby="controls-help"
+                ></canvas>
+                <p id="controls-help" class="controls-help">
+                    Player 1 uses W, A, S, D. Player 2 uses the arrow keys.
+                </p>
+            </div>
+            <aside id="leaderboard" aria-live="polite">
+                <h2>Session score</h2>
+                <p>Start a round to begin tracking wins.</p>
+            </aside>
+        </section>
+
+        <section id="setup-panel" class="control-panel" aria-labelledby="setup-title">
+            <h2 id="setup-title">Set up a round</h2>
+            <div id="game-mode-selection" role="group" aria-label="Game mode">
+                <button id="single-player" type="button">Single player</button>
+                <button id="two-player" type="button">Two players</button>
+            </div>
+            <p id="mode-description" aria-live="polite">Two players on one keyboard.</p>
+
+            <div id="player-inputs">
+                <label for="player1-name">Player 1 name</label>
+                <input type="text" id="player1-name" placeholder="Player 1" maxlength="24">
+
+                <label for="player1-color">Player 1 color</label>
+                <input type="color" id="player1-color" value="#2157d5">
+
+                <label id="player2-label" for="player2-name">Player 2 name</label>
+                <input type="text" id="player2-name" placeholder="Player 2" maxlength="24">
+
+                <label for="player2-color">Player 2 color</label>
+                <input type="color" id="player2-color" value="#dc3545">
+
+                <button id="start-game" class="primary-action" type="button">Start game</button>
+            </div>
+        </section>
+
+        <button id="restart-game" class="primary-action" type="button" hidden>Restart round</button>
+
+        <section class="advanced-settings" aria-labelledby="settings-title">
+            <button id="toggle-constants-menu" type="button" aria-expanded="false" aria-controls="game-constants-menu">
+                Adjust game constants
+            </button>
+            <div id="game-constants-menu" hidden>
+                <h2 id="settings-title">Game constants</h2>
+                <label for="iceberg-radius">Iceberg radius</label>
+                <input type="number" id="iceberg-radius" min="100" max="400" step="10">
+                <label for="penguin-radius">Penguin radius</label>
+                <input type="number" id="penguin-radius" min="10" max="40" step="1">
+                <label for="push-force">Push force</label>
+                <input type="number" id="push-force" min="1" max="10" step="0.1">
+                <label for="friction">Friction</label>
+                <input type="number" id="friction" min="0.9" max="0.99" step="0.01">
+                <button id="apply-constants" type="button">Apply changes</button>
+            </div>
+        </section>
+    </main>
     <script src="{{ url_for('static', filename='js/audio.js') }}"></script>
     <script type="module" src="{{ url_for('static', filename='js/game.js') }}"></script>
 </body>

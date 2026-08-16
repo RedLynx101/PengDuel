@@ -2,7 +2,6 @@ import { PENGUIN_RADIUS, ICEBERG_RADIUS, FRICTION, PUSH_FORCE } from './game.js'
 
 export class Penguin {
     constructor(x, y, color, name, penguinSVG) {
-        console.log(`Penguin constructor called for ${name}`);
         this.x = x;
         this.y = y;
         this.color = color;
@@ -36,7 +35,6 @@ export class Penguin {
             const svgString = new XMLSerializer().serializeToString(svgElement);
             const img = new Image();
             img.onload = () => {
-                console.log(`SVG image loaded for ${this.name}`);
                 this.svgImage = img;
             };
             img.onerror = (error) => {
@@ -58,7 +56,6 @@ export class Penguin {
     }
 
     draw(ctx) {
-        console.log(`Drawing penguin: ${this.name}, position: (${this.x}, ${this.y})`);
         if (this.svgImage) {
             ctx.drawImage(this.svgImage, this.x - this.currentRadius, this.y - this.currentRadius, this.currentRadius * 2, this.currentRadius * 2);
         } else {
@@ -72,13 +69,11 @@ export class Penguin {
     }
 
     drawNameAndCrown(ctx) {
-        console.log(`Drawing name and crown for ${this.name}, crowned: ${this.crowned}`);
         ctx.fillStyle = 'black';
         ctx.font = '14px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(this.name, this.x, this.y + this.currentRadius + 20);
         if (this.crowned) {
-            console.log(`Drawing crown for ${this.name}`);
             ctx.beginPath();
             ctx.moveTo(this.x, this.y - this.currentRadius - 15);
             ctx.lineTo(this.x - 15, this.y - this.currentRadius);
@@ -131,7 +126,6 @@ export class Penguin {
     }
 
     setCrowned(crowned) {
-        console.log(`Setting crowned status for ${this.name}: ${crowned}`);
         this.crowned = crowned;
     }
 

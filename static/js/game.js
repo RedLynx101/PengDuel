@@ -20,7 +20,6 @@ fetch('/static/assets/penguin.svg')
   .then(response => response.text())
   .then(svgData => {
     penguinSVG = svgData;
-    console.log('Penguin SVG loaded successfully');
   })
   .catch(error => {
     console.error('Error loading penguin SVG:', error);
@@ -29,7 +28,7 @@ fetch('/static/assets/penguin.svg')
 const scores = {};
 function updateLeaderboard() {
   const leaderboardDiv = document.getElementById('leaderboard');
-  leaderboardDiv.innerHTML = '<h2>Leaderboard</h2>';
+  leaderboardDiv.innerHTML = '<h2>Session score</h2>';
   Object.entries(scores).forEach(([name, score]) => {
     leaderboardDiv.innerHTML += `<p>${name}: ${score}</p>`;
   });
@@ -43,12 +42,10 @@ let powerUps = [];
 let animationFrameId;
 
 function init() {
-    console.log('Game initialization started');
     const player1Name = document.getElementById('player1-name').value || 'Player 1';
     const player2Name = gameMode === 'singlePlayer' ? 'AI Penguin' : (document.getElementById('player2-name').value || 'Player 2');
     const player1Color = document.getElementById('player1-color').value;
     const player2Color = document.getElementById('player2-color').value;
-    console.log(`Initializing players: ${player1Name} (${player1Color}) and ${player2Name} (${player2Color})`);
     const prevPlayer1Crowned = player1 ? player1.crowned : false;
     const prevPlayer2Crowned = player2 ? player2.crowned : false;
     player1 = new Penguin(canvas.width/2 - 50, canvas.height/2, player1Color, player1Name, penguinSVG);
@@ -69,16 +66,11 @@ function init() {
     if (!scores[player2.name]) scores[player2.name] = 0;
     updateLeaderboard();
     gameState = 'playing';
-    console.log('Game state set to:', gameState);
-    document.getElementById('player-inputs').style.display = 'none';
-    document.getElementById('restart-game').style.display = 'none';
-    console.log('Game initialized with players:', player1Name, 'and', player2Name);
-    console.log('Stopping background music');
+    document.getElementById('setup-panel').hidden = true;
+    document.getElementById('restart-game').hidden = true;
     audioManager.stopBackgroundMusic();
-    console.log('Attempting to start background music');
     audioManager.playBackgroundMusic('background');
-    console.log('Setting collision sound volume');
-    audioManager.setVolume('collision', 8);
+    audioManager.setVolume('collision', 0.3);
     powerUps = [new PowerUp(canvas.width, canvas.height)];
     if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -153,37 +145,30 @@ function update() {
     }
 }
 function draw() {
-    console.log('Drawing game frame, gameState:', gameState);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawIceberg();
     if (player1) {
-        console.log('Attempting to draw player1');
         player1.draw(ctx);
     }
     if (player2) {
-        console.log('Attempting to draw player2');
         player2.draw(ctx);
     }    
-    console.log('Drawing power-ups');
     powerUps.forEach(powerUp => powerUp.draw(ctx));
 
     if (gameState === 'gameOver' && winner) {
-        console.log('Drawing game over screen');
         ctx.fillStyle = 'black';
         ctx.font = '30px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(`${winner.name} wins!`, canvas.width/2, 50);
-        document.getElementById('restart-game').style.display = 'block';
+        document.getElementById('restart-game').hidden = false;
     }
 }
 function gameLoop() {
-    console.log('Game loop iteration');
     update();
     draw();
     animationFrameId = requestAnimationFrame(gameLoop);
 }
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM content loaded, setting up event listeners');
 
     document.addEventListener('keydown', (e) => {
         if (gameState === 'playing') {
@@ -213,9 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Add event listener for restart button
     document.getElementById('start-game').addEventListener('click', () => {
-        console.log('Start Game button clicked');
         init();
     });
 
@@ -235,21 +218,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 document.getElementById('single-player').addEventListener('click', () => {
-    console.log('Single Player mode selected');
     gameMode = 'singlePlayer';
-    document.getElementById('player2-name').style.display = 'none';
-    document.getElementById('player2-label').textContent = 'AI Opponent';
+    document.getElementById('player2-name').hidden = true;
+    document.getElementById('player2-label').hidden = true;
+    document.getElementById('mode-description').textContent = 'Single player against the steering AI.';
 });
 document.getElementById('two-player').addEventListener('click', () => {
-    console.log('Two Player mode selected');
     gameMode = 'twoPlayer';
-    document.getElementById('player2-name').style.display = 'inline-block';
-    document.getElementById('player2-label').textContent = 'Player 2 Name:';
+    document.getElementById('player2-name').hidden = false;
+    document.getElementById('player2-label').hidden = false;
+    document.getElementById('mode-description').textContent = 'Two players on one keyboard.';
 });
 // New event listeners for game constants menu
 document.getElementById('toggle-constants-menu').addEventListener('click', () => {
     const menu = document.getElementById('game-constants-menu');
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+    const shouldOpen = menu.hidden;
+    menu.hidden = !shouldOpen;
+    document.getElementById('toggle-constants-menu').setAttribute('aria-expanded', String(shouldOpen));
 });
 document.getElementById('apply-constants').addEventListener('click', () => {
     ICEBERG_RADIUS = Number(document.getElementById('iceberg-radius').value);
@@ -259,13 +244,12 @@ document.getElementById('apply-constants').addEventListener('click', () => {
     // Update penguin sizes
     if (player1) player1.currentRadius = PENGUIN_RADIUS;
     if (player2) player2.currentRadius = PENGUIN_RADIUS;
-    console.log('Game constants updated:', { ICEBERG_RADIUS, PENGUIN_RADIUS, PUSH_FORCE, FRICTION });
 });
 // Initialize input fields with current values
 document.getElementById('iceberg-radius').value = ICEBERG_RADIUS;
 document.getElementById('penguin-radius').value = PENGUIN_RADIUS;
 document.getElementById('push-force').value = PUSH_FORCE;
 document.getElementById('friction').value = FRICTION;
-console.log('Event listeners set up successfully');});
+});
 
 drawIceberg();

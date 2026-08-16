@@ -4,7 +4,6 @@ import { PENGUIN_RADIUS, ICEBERG_RADIUS } from './game.js';
 export class AIPenguin extends Penguin {
     constructor(x, y, color, name, penguinSVG) {
         super(x, y, color, name, penguinSVG);
-        console.log(`AIPenguin constructor called for ${name}, SVG passed: ${!!penguinSVG}`);
         this.initialX = x;
         this.initialY = y;
         this.initialAcceleration = 0.1;
@@ -58,17 +57,14 @@ export class AIPenguin extends Penguin {
                 this.vy *= scale;
             }
         }
-        console.log(`AI Speed: ${Math.sqrt(this.vx * this.vx + this.vy * this.vy)}`);
     }
 
     reset() {
-        console.log('Resetting AIPenguin');
         this.x = this.initialX;
         this.y = this.initialY;
         this.vx = 0;
         this.vy = 0;
         this.acceleration = this.initialAcceleration;
         this.maxSpeed = this.initialMaxSpeed;
-        console.log(`AIPenguin reset - Position: (${this.x}, ${this.y}), Acceleration: ${this.acceleration}, Max Speed: ${this.maxSpeed}`);
     }
 }
