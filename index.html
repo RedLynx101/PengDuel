@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PengDuel is a browser physics game: two penguins, one iceberg, and the first one pushed into the sea loses.">
+    <meta name="theme-color" content="#06121f">
+    <title>PengDuel</title>
+    <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+<body>
+    <a class="skip-link" href="#game-area">Skip to the game</a>
+
+    <header class="topbar">
+        <div class="brand">
+            <img src="static/favicon.svg" alt="" width="40" height="40">
+            <div>
+                <h1>PengDuel</h1>
+                <p class="tagline">Two penguins. One iceberg. Push first.</p>
+            </div>
+        </div>
+        <button id="mute-toggle" class="icon-button" type="button" aria-pressed="false" aria-label="Mute sound">
+            <span aria-hidden="true" class="sound-on">Sound on</span>
+            <span aria-hidden="true" class="sound-off">Sound off</span>
+        </button>
+    </header>
+
+    <main id="game-container">
+        <section id="game-area" class="arena-card" aria-label="PengDuel play area" tabindex="-1">
+            <canvas
+                id="gameCanvas"
+                width="800"
+                height="600"
+                role="img"
+                aria-label="PengDuel iceberg arena"
+                aria-describedby="controls-help"
+            ></canvas>
+            <p id="status-line" class="status-line" aria-live="polite">Pick a mode and press Start.</p>
+            <p id="controls-help" class="visually-hidden">
+                Player 1 uses W, A, S, D. Player 2 uses the arrow keys. Press Space or Enter to start or replay a round.
+            </p>
+        </section>
+
+        <aside class="sidebar">
+            <section class="panel" aria-labelledby="setup-title">
+                <h2 id="setup-title">Match</h2>
+                <div id="game-mode-selection" class="segmented" role="group" aria-label="Game mode">
+                    <button id="single-player" type="button" aria-pressed="true">vs AI</button>
+                    <button id="two-player" type="button" aria-pressed="false">Two players</button>
+                </div>
+                <p id="mode-description" class="hint">You against a penguin that plays to win.</p>
+
+                <div class="player-card" data-player="1">
+                    <label for="player1-name">Player 1</label>
+                    <input type="text" id="player1-name" placeholder="Player 1" maxlength="16" autocomplete="off">
+                    <div class="swatches" role="radiogroup" aria-label="Player 1 color" data-target="player1-color"></div>
+                    <input type="hidden" id="player1-color" value="#3b82f6">
+                </div>
+
+                <div class="player-card" data-player="2">
+                    <label id="player2-label" for="player2-name">Player 2</label>
+                    <input type="text" id="player2-name" placeholder="Player 2" maxlength="16" autocomplete="off">
+                    <div class="swatches" role="radiogroup" aria-label="Player 2 color" data-target="player2-color"></div>
+                    <input type="hidden" id="player2-color" value="#f43f5e">
+                </div>
+
+                <button id="start-game" class="primary-action" type="button">Start round</button>
+            </section>
+
+            <section class="panel" aria-labelledby="score-title">
+                <h2 id="score-title">Session score</h2>
+                <ol id="leaderboard" class="scoreboard" aria-live="polite">
+                    <li class="empty">No rounds yet.</li>
+                </ol>
+                <button id="reset-scores" class="text-button" type="button">Reset scores</button>
+            </section>
+
+            <section class="panel" aria-labelledby="keys-title">
+                <h2 id="keys-title">Controls</h2>
+                <dl class="keys">
+                    <div><dt>Player 1</dt><dd><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dd></div>
+                    <div><dt>Player 2</dt><dd><kbd>↑</kbd><kbd>←</kbd><kbd>↓</kbd><kbd>→</kbd></dd></div>
+                    <div><dt>Start / replay</dt><dd><kbd class="wide">Space</kbd></dd></div>
+                    <div class="touch-only"><dt>Touch</dt><dd>Hold and drag on the ice to steer Player 1.</dd></div>
+                </dl>
+                <p class="hint">Grab <span class="legend speed">bolt</span> orbs to get smaller and faster, <span class="legend size">grow</span> orbs to get bigger and heavier. Each lasts ten seconds.</p>
+            </section>
+
+            <details class="panel advanced-settings">
+                <summary id="toggle-constants-menu">Tune the physics</summary>
+                <div id="game-constants-menu">
+                    <label for="iceberg-radius">Iceberg radius <output for="iceberg-radius"></output></label>
+                    <input type="range" id="iceberg-radius" min="150" max="280" step="10">
+                    <label for="penguin-radius">Penguin size <output for="penguin-radius"></output></label>
+                    <input type="range" id="penguin-radius" min="14" max="34" step="1">
+                    <label for="push-force">Push force <output for="push-force"></output></label>
+                    <input type="range" id="push-force" min="2" max="12" step="0.5">
+                    <label for="friction">Ice grip <output for="friction"></output></label>
+                    <input type="range" id="friction" min="0.94" max="0.99" step="0.005">
+                    <button id="reset-constants" class="text-button" type="button">Back to defaults</button>
+                </div>
+            </details>
+        </aside>
+    </main>
+
+    <footer class="footer">
+        <p>Made by Noah Hicks · <a href="https://github.com/RedLynx101/PengDuel">Source on GitHub</a></p>
+    </footer>
+
+    <script type="module" src="static/js/game.js"></script>
+</body>
+</html>

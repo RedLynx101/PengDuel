@@ -1,70 +1,67 @@
 import { Penguin } from './Penguin.js';
-import { PENGUIN_RADIUS, ICEBERG_RADIUS } from './game.js';
+import { settings, WORLD } from './config.js';
 
+/**
+ * A penguin that plays to win: it works its way between the opponent and the middle of the
+ * iceberg, then charges outward; it backs off the edge when it is in danger and grabs a
+ * power-up when one is closer to it than to the opponent.
+ */
 export class AIPenguin extends Penguin {
-    constructor(x, y, color, name, penguinSVG) {
-        super(x, y, color, name, penguinSVG);
-        this.initialX = x;
-        this.initialY = y;
-        this.initialAcceleration = 0.1;
-        this.initialMaxSpeed = 1.2;
-        this.reset();
+  constructor(options) {
+    super(options);
+    this.thinkTimer = 0;
+    this.target = { x: options.x, y: options.y };
+    this.strength = 0.82; // a little slower to react than a human
+  }
+
+  reset(x, y, facing) {
+    super.reset(x, y, facing);
+    this.thinkTimer = 0;
+    this.target = { x, y };
+  }
+
+  think(opponent, powerUps) {
+    this.thinkTimer -= 1;
+    if (this.thinkTimer > 0) return;
+    this.thinkTimer = 5 + Math.floor(Math.random() * 6);
+
+    const R = settings.icebergRadius;
+    const r = this.currentRadius;
+    const myDist = Math.hypot(this.x - WORLD.cx, this.y - WORLD.cy);
+
+    // Self-preservation first.
+    if (myDist > R - r * 2.6) {
+      this.target = { x: WORLD.cx, y: WORLD.cy };
+      return;
     }
 
-    update(canvas, gameState, winner, audioManager, scores, updateLeaderboard, player1) {
-        super.update(canvas, gameState, winner, audioManager, scores, updateLeaderboard);
-        this.updateTarget(canvas, player1);
-        this.moveTowardsTarget();
-        return gameState;
+    // Take a power-up that is clearly ours.
+    const orb = powerUps.find((p) => !p.taken);
+    if (orb) {
+      const mine = Math.hypot(orb.x - this.x, orb.y - this.y);
+      const theirs = Math.hypot(orb.x - opponent.x, orb.y - opponent.y);
+      if (mine < theirs * 0.6 && mine < R * 0.9) {
+        this.target = { x: orb.x, y: orb.y };
+        return;
+      }
     }
 
-    updateTarget(canvas, player1) {
-        if (Math.random() < 0.55) {  // 55% of the time, target the player
-            const offsetX = (Math.random() - 0.5) * PENGUIN_RADIUS * 8;
-            const offsetY = (Math.random() - 0.5) * PENGUIN_RADIUS * 8;
-            this.targetX = player1.x + offsetX;
-            this.targetY = player1.y + offsetY;
-        } else {  // 45% of the time, choose a random point on the iceberg
-            const angle = Math.random() * Math.PI * 2;
-            const distance = Math.random() * (ICEBERG_RADIUS - PENGUIN_RADIUS);
-            this.targetX = canvas.width / 2 + Math.cos(angle) * distance;
-            this.targetY = canvas.height / 2 + Math.sin(angle) * distance;
-        }
-    }
+    // Get between the opponent and the centre, then push outward through them.
+    const ox = opponent.x - WORLD.cx;
+    const oy = opponent.y - WORLD.cy;
+    const oDist = Math.hypot(ox, oy) || 1;
+    const ux = ox / oDist;
+    const uy = oy / oDist;
+    const lineUpX = opponent.x - ux * (r + opponent.currentRadius) * 1.4;
+    const lineUpY = opponent.y - uy * (r + opponent.currentRadius) * 1.4;
+    const lined = Math.hypot(this.x - lineUpX, this.y - lineUpY) < r * 1.6;
+    const jitter = (Math.random() - 0.5) * r * 1.5;
+    this.target = lined
+      ? { x: opponent.x + ux * r * 2 + jitter, y: opponent.y + uy * r * 2 - jitter }
+      : { x: lineUpX + jitter, y: lineUpY - jitter };
+  }
 
-    moveTowardsTarget() {
-        const dx = this.targetX - this.x;
-        const dy = this.targetY - this.y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        // Only apply movement if the distance is significant
-        if (distance > 1) {
-            // Normalize direction vector
-            const vx = (dx / distance) * this.acceleration;
-            const vy = (dy / distance) * this.acceleration;
-
-            // Add acceleration to the current velocity
-            this.vx += vx;
-            this.vy += vy;
-
-            // Calculate the current speed
-            const currentSpeed = Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-
-            // Ensure the AI doesn't exceed the maximum speed
-            if (currentSpeed > this.maxSpeed) {
-                const scale = this.maxSpeed / currentSpeed;
-                this.vx *= scale;
-                this.vy *= scale;
-            }
-        }
-    }
-
-    reset() {
-        this.x = this.initialX;
-        this.y = this.initialY;
-        this.vx = 0;
-        this.vy = 0;
-        this.acceleration = this.initialAcceleration;
-        this.maxSpeed = this.initialMaxSpeed;
-    }
+  drive() {
+    this.applyInput(this.target.x - this.x, this.target.y - this.y, this.strength);
+  }
 }
